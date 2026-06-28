@@ -16,7 +16,7 @@ def apply_rule(qs, field, value):
 
 def get_board(game):
     cells = Cell.objects.filter(game=game)
-    board = [[None for _ in range(3)] for _ in range(3)]
+    board = [[{"symbol": None} for _ in range(3)] for _ in range(3)]
     for cell in cells:
         board[cell.row][cell.col] = {
             "symbol": cell.symbol,
@@ -27,18 +27,25 @@ def get_board(game):
 def check_win(board):
     lines = []
     lines.extend(board)
-    lines.extend([[board[r][c] for r in range(3)] for c in range(3)])  # cols
+    lines.extend([[board[r][c] for r in range(3)] for c in range(3)])
     lines.append([board[0][0], board[1][1], board[2][2]])
     lines.append([board[0][2], board[1][1], board[2][0]])
+
     for line in lines:
-        if line[0].symbol and line[0].symbol == line[1].symbol == line[2].symbol:
-            return line[0]
+        if not line[0] or not line[1] or not line[2]:
+            continue
+        s1 = line[0]["symbol"]
+        s2 = line[1]["symbol"]
+        s3 = line[2]["symbol"]
+        if s1 and s1 == s2 == s3:
+            return s1
+
     return None
 
 def is_draw(board):
     for row in board:
         for cell in row:
-            if cell is None:
+            if cell["symbol"] is None:
                 return False
     return True
 
@@ -116,13 +123,13 @@ def create_game(request):
     game = Game.objects.create()
     RowRule.objects.bulk_create([
         RowRule(game=game, index=0, field="country", value="Hrvatska"),
-        RowRule(game=game, index=1, field="club", value="Barcelona"),
-        RowRule(game=game, index=2, field="country", value="Argentina"),
+        RowRule(game=game, index=1, field="country", value="Hrvatska"),
+        RowRule(game=game, index=2, field="country", value="Hrvatska"),
     ])
     ColRule.objects.bulk_create([
-        ColRule(game=game, index=0, field="club", value="PSG"),
-        ColRule(game=game, index=1, field="country", value="Brazil"),
-        ColRule(game=game, index=2, field="club", value="Real Madrid"),
+        ColRule(game=game, index=0, field="club", value="Hajduk"),
+        ColRule(game=game, index=1, field="club", value="Dinamo"),
+        ColRule(game=game, index=2, field="club", value="Rijeka"),
     ])
     for r in range(3):
         for c in range(3):
