@@ -1,51 +1,71 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Player, Game, Cell, RowRule, ColRule
+from .models import Player, Game, Cell, RowRule, ColRule, Country, Club, Confederation
 from .serializer import PlayerSerializer
+import random
+from functools import partial
+from .engine.players import get_all_players
+from .engine.rules import apply_rule
+from .engine.board import get_board
+from .engine.logic import check_win, is_draw
 
+RULE_TYPES = [
+    "country",
+    "club",
+    "confederation"
+]
 
-def apply_rule(qs, field, value):
+def random_rule():
+    field = random.choice(RULE_TYPES)
     if field == "country":
-        return qs.filter(country__name__iexact=value)
-    if field == "club":
-        return qs.filter(clubs__name__iexact=value)
-    if field == "confederation":
-        return qs.filter(country__confederation__name__iexact=value)
-    return qs
+        value = random.choice(list(Country.objects.values_list("name", flat=True)))
+    elif field == "club":
+        value = random.choice(list(Club.objects.values_list("name", flat=True)))
+    elif field == "confederation":
+        value = random.choice(list(Confederation.objects.values_list("name", flat=True)))
+    return field, value
 
-def get_board(game):
-    cells = Cell.objects.filter(game=game)
-    board = [[{"symbol": None} for _ in range(3)] for _ in range(3)]
-    for cell in cells:
-        board[cell.row][cell.col] = {
-            "symbol": cell.symbol,
-            "player": cell.player_name
-        }
-    return board
+def create_rules(game):
+    RowRule.objects.filter(game=game).delete()
+    ColRule.objects.filter(game=game).delete()
 
-def check_win(board):
-    lines = []
-    lines.extend(board)
-    lines.extend([[board[r][c] for r in range(3)] for c in range(3)])
-    lines.append([board[0][0], board[1][1], board[2][2]])
-    lines.append([board[0][2], board[1][1], board[2][0]])
+    row_rules = []
+    col_rules = []
+    
+    used=set()
+    used_fields=set()
+    for i in range(3):
+        field, value = random_rule()
+        while ((field,value) in used):
+            field, value = random_rule()
+        used.add((field,value))
+        if (field!="club"):
+            used_fields.add(field)
+        row_rules.append((field, value))
 
-    for line in lines:
-        if not line[0] or not line[1] or not line[2]:
-            continue
-        s1 = line[0]["symbol"]
-        s2 = line[1]["symbol"]
-        s3 = line[2]["symbol"]
-        if s1 and s1 == s2 == s3:
-            return s1
+    for i in range(3):
+        field, value = random_rule()
+        while (field in used_fields or (field,value) in used):
+            field, value = random_rule()
+        used.add((field,value))
+        col_rules.append((field, value))
 
-    return None
+    for i, (field, value) in enumerate(row_rules):
+        RowRule.objects.create(game=game, index=i, field=field, value=value)
 
-def is_draw(board):
-    for row in board:
-        for cell in row:
-            if cell["symbol"] is None:
+    for i, (field, value) in enumerate(col_rules):
+        ColRule.objects.create(game=game, index=i, field=field, value=value)
+
+def board_is_valid(game):
+    players = get_all_players()
+    row_rules = list(RowRule.objects.filter(game=game).order_by("index"))
+    col_rules = list(ColRule.objects.filter(game=game).order_by("index"))
+    for r in range(3):
+        for c in range(3):
+            filtered = apply_rule(players, row_rules[r].field, row_rules[r].value)
+            filtered = apply_rule(filtered, col_rules[c].field, col_rules[c].value)
+            if len(filtered) == 0:
                 return False
     return True
 
@@ -91,46 +111,48 @@ def play_move(request):
     col_rule = ColRule.objects.get(game=game, index=col)
     qs = apply_rule(qs, row_rule.field, row_rule.value)
     qs = apply_rule(qs, col_rule.field, col_rule.value)
-    if not qs.exists():
-        return Response({"valid": False, "reason": "Invalid move"})
-
-    cell = Cell.objects.get(game=game, row=row, col=col)
-    cell.player_name = player.name
-    cell.symbol = game.current_turn
-    cell.save()
+    valid_move = True
+    if not qs:
+        valid_move = False
+    if valid_move:
+        cell.player_name = player.name
+        cell.symbol = game.current_turn
+        cell.save()
 
     game.current_turn = "O" if game.current_turn == "X" else "X"
-    board = get_board(game)
-    winner = check_win(board)
-    if winner:
+    cells = Cell.objects.filter(game=game)
+    board = get_board(cells)
+    winner_data = check_win(board)
+    if winner_data:
         game.is_finished = True
-        game.winner = winner
+        game.winner = winner_data["winner"]
+        winning_line=winner_data["line"]
     elif is_draw(board):
         game.is_finished = True
         game.winner = "draw"
+        winning_line=None
+    else:
+        winning_line=None
     game.save()
 
     return Response({
-        "valid": True,
+        "valid": valid_move,
         "board": board,
         "current_turn": game.current_turn,
         "is_finished": game.is_finished,
-        "winner": game.winner
+        "winner": game.winner,
+        "winning_line": winning_line
     })
 
 @api_view(['POST'])
 def create_game(request):
     game = Game.objects.create()
-    RowRule.objects.bulk_create([
-        RowRule(game=game, index=0, field="country", value="Hrvatska"),
-        RowRule(game=game, index=1, field="country", value="Hrvatska"),
-        RowRule(game=game, index=2, field="country", value="Hrvatska"),
-    ])
-    ColRule.objects.bulk_create([
-        ColRule(game=game, index=0, field="club", value="Hajduk"),
-        ColRule(game=game, index=1, field="club", value="Dinamo"),
-        ColRule(game=game, index=2, field="club", value="Rijeka"),
-    ])
+    while True:
+        create_rules(game)
+        if board_is_valid(game):
+            break
+        game.row_rules.all().delete()
+        game.col_rules.all().delete()
     for r in range(3):
         for c in range(3):
             Cell.objects.create(game=game, row=r, col=c)
@@ -147,10 +169,20 @@ def get_game(request, game_id):
             "error": "Game not found"
         }, status=404)
 
-    board = get_board(game)
+    cells = Cell.objects.filter(game=game)
+    board = get_board(cells)
     return Response({
         "game_id": str(game.id),
         "board": board,
+        "row_rules": [
+            {"index": r.index, "field": r.field, "value": r.value}
+            for r in game.row_rules.all()
+        ],
+        "col_rules": [
+            {"index": c.index, "field": c.field, "value": c.value}
+            for c in game.col_rules.all()
+        ],
+        "current_turn": game.current_turn,
         "is_finished": game.is_finished,
         "winner": game.winner
     })

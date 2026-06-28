@@ -11,7 +11,7 @@ class Confederation(models.Model):
 
 class Country(models.Model):
     name = models.CharField(max_length=100)
-    continent = models.ForeignKey(
+    confederation = models.ForeignKey(
         Confederation,
         on_delete=models.CASCADE,
         related_name="countries"

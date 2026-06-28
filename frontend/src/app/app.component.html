@@ -1,7 +1,7 @@
 <h1>Tiki Taka Toe</h1>
 
 <button (click)="createGame()">
-  Create Game
+  New Game
 </button>
 
 <div *ngIf="gameId">
@@ -22,11 +22,21 @@
   </h2>
 </div>
 
-<!-- BOARD -->
+<div style="display: flex; margin-left: 60px;">
+  <div *ngFor="let col of colRules" style="width: 60px; text-align: center;">
+    {{ col.value }}
+  </div>
+</div>
 <div *ngIf="board.length">
   <div *ngFor="let row of board; let i = index" style="display: flex;">
+    <div style="width: 60px; display:flex; align-items:center; justify-content:center;">
+      {{ rowRules[i]?.value }}
+    </div>
     <div
       *ngFor="let cell of row; let j = index"
+      [ngStyle]="{
+        'background-color': isWinningCell(i,j) ? '#90ee90' : 'white'
+      }"
       style="
         width: 60px;
         height: 60px;
@@ -45,4 +55,24 @@
       </div>
     </div>
   </div>
+</div>
+
+<div *ngIf="showPicker" class="modal">
+  
+  <input
+    type="text"
+    placeholder="Search player..."
+    [(ngModel)]="searchTerm"
+    (input)="onSearchChange(searchTerm)"
+  />
+
+  <div *ngFor="let player of filteredPlayers"
+       (click)="selectPlayer(player)">
+    {{ player.name }}
+  </div>
+
+</div>
+
+<div *ngIf="showInvalidMoveFeedback" style="color:red;">
+  Invalid move ❌
 </div>

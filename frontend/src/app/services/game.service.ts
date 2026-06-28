@@ -20,7 +20,7 @@ export class GameService {
   }
 
   getPlayers() {
-    return this.http.get(`${this.api}/players/`);
+    return this.http.get<any[]>(`${this.api}/players/`);
   }
 
   playMove(data: {
