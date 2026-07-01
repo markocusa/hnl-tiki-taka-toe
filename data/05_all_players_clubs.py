@@ -11,15 +11,15 @@ players = {}
 i=1
 mistakes = {}
 for player_id, player_name in players_load.items():
-    if(i%100==0):
+    if(i%50==1):
         print("Players:",len(players))
         print("Mistakes:",len(mistakes))
         print()
     try:
-        response = requests.get(f"{BASE_URL}/players/{player_id}/transfers")
+        response = requests.get(f"{BASE_URL}/players/{player_id}/transfers",timeout=10)
         response.raise_for_status()
     except:
-        #print("Greška",i)
+        print("Greška",i)
         mistakes[player_id]=player_name
         i+=1
         continue
@@ -31,12 +31,12 @@ for player_id, player_name in players_load.items():
         clubs.add(t["clubTo"]["name"])
 
     try:
-        response = requests.get(f"{BASE_URL}/players/{player_id}/profile")
+        response = requests.get(f"{BASE_URL}/players/{player_id}/profile",timeout=10)
         response.raise_for_status()
-        #print("Igrač",i)
+        print("Igrač",i)
         i+=1
     except:
-        #print("Greška",i)
+        print("Greška",i)
         mistakes[player_id]=player_name
         i+=1
         continue
