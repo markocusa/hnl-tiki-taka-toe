@@ -16,7 +16,10 @@ def apply_rule(players, field, value):
 
 @register_rule("country")
 def country_rule(players, value):
-    return [p for p in players if p.country.name.lower() == value.lower()]
+    return [
+        p for p in players
+        if any(c.name.lower() == value.lower() for c in p.countries.all())
+    ]
 
 
 @register_rule("club")
@@ -31,5 +34,8 @@ def club_rule(players, value):
 def conf_rule(players, value):
     return [
         p for p in players
-        if p.country.confederation.name.lower() == value.lower()
+        if any(
+            c.confederation.name.lower() == value.lower()
+            for c in p.countries.all()
+        )
     ]

@@ -95,7 +95,7 @@ def play_move(request):
     if row < 0 or row > 2 or col < 0 or col > 2:
         return Response({"valid": False, "reason": "Invalid board position"})
 
-    player = Player.objects.filter(name__iexact=player_name).first()
+    player = Player.objects.filter(name=player_name).first()
     if not player:
         return Response({"valid": False, "reason": "Player not found"})
     
