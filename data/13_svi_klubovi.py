@@ -1,13 +1,26 @@
 import requests
 import json
+import os
 
 BASE_URL = "https://transfermarkt-api.fly.dev"
 
+if os.path.exists("data/jsons/clubs_by_season.json"):
+    with open("data/jsons/clubs_by_season.json", "r", encoding="utf-8") as f:
+        clubs_by_season = json.load(f)
+else:
+    clubs_by_season = {}
+
+if os.path.exists("data/jsons/all_clubs.json"):
+    with open("data/jsons/all_clubs.json", "r", encoding="utf-8") as f:
+        all_clubs = json.load(f)
+else:
+    all_clubs = {}
+
 seasons = range(2006, 2027)  # 2006–2026 uključivo
-clubs_by_season = {}
-all_clubs = {}
 
 for season in seasons:
+    if (season in clubs_by_season.keys()):
+        continue
     url = f"{BASE_URL}/competitions/KR1/clubs"
 
     response = requests.get(url,params={"season_id": season})

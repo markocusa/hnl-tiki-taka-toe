@@ -70,31 +70,6 @@
     "kup_naslovi": 4,
     "superkup_naslovi": 0
   },
-  "458540": {
-    "tm_id": "458540",
-    "name": "Ivan Posavec",
-    "citizenship": [
-      "Croatia"
-    ],
-    "nameInHomeCountry": "Ivan Posavec",
-    "isRetired": false,
-    "marketValue": 50000,
-    "player_slug": "ivan-posavec",
-    "klubovi": null,
-    "treneri": null,
-    "hnl_nastupi": null,
-    "kup_nastupi": null,
-    "superkup_nastupi": null,
-    "A_repka_nastupi": null,
-    "hnl_golovi": null,
-    "finale_kupa_nastupi": null,
-    "finale_kupa_golovi": null,
-    "superkup_golovi": null,
-    "najbolji_strijelac": 0,
-    "hnl_naslovi": 0,
-    "kup_naslovi": 0,
-    "superkup_naslovi": 0
-  },
   "47623": {
     "tm_id": "47623",
     "name": null,

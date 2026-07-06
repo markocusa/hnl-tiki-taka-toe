@@ -22,6 +22,9 @@ if os.path.exists("data/jsons/mistakes_players_data.json"):
 else:
     mistakes = set()
 
+with open("data/jsons/all_coaches.json", "r", encoding="utf-8") as f:
+    coaches = json.load(f)
+
 # osobni podaci
 BASE_URL = "https://transfermarkt-api.fly.dev"
 
@@ -34,6 +37,8 @@ for id,value in all_players.items():
         data = response.json()
         name=data["name"]
         citizenship=data["citizenship"]
+        if ("N/A" in citizenship):
+            citizenship.remove("N/A")
         nameInHomeCountry=data.get("nameInHomeCountry") or name
         isRetired=data["isRetired"]
         marketValue=data.get("marketValue") or 0
@@ -78,13 +83,13 @@ for id,value in all_players.items():
         finale_kupa_utakmice = [match for match in kup_utakmice if match["gameInformation"]["competitionGroupId"] == "FF"]
 
         klubovi = list(set([match["clubsInformation"]["club"]["clubId"] for match in hnl_utakmice]))
-        treneri = list(set([match["clubsInformation"]["club"]["coachId"] for match in hnl_utakmice]))
+        treneri = list(set([match["clubsInformation"]["club"]["coachId"] for match in hnl_utakmice if match["clubsInformation"]["club"]["coachId"] in coaches.keys()]))
 
         A_repka_nastupi = len(A_repka_utakmice)
         hnl_nastupi = len(hnl_utakmice)
         kup_nastupi = len(kup_utakmice)
         superkup_nastupi = len(superkup_utakmice)
-        hnl_golovi = sum(match["statistics"]["goalStatistics"]["goalsScoredTotal"] for match in hnl_utakmice)
+        hnl_golovi = sum(match["statistics"]["goalStatistics"]["goalsScoredTotal"] for match in hnl_utakmice if match["statistics"]["goalStatistics"]["goalsScoredTotal"] is not None)
         finale_kupa_nastupi = len(finale_kupa_utakmice)
         finale_kupa_golovi = sum(match["statistics"]["goalStatistics"]["goalsScoredTotal"] for match in finale_kupa_utakmice)
         superkup_golovi = sum(match["statistics"]["goalStatistics"]["goalsScoredTotal"] for match in superkup_utakmice)

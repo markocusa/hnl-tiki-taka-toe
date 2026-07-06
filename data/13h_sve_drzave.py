@@ -1,7 +1,7 @@
 import json
 import requests
 
-with open("data/jsons/players_only_needed_clubs.json", "r", encoding="utf-8") as f:
+with open("data/jsons/all_players_data.json", "r", encoding="utf-8") as f:
     players = json.load(f)
 
 countries = set() 
