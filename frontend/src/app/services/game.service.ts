@@ -32,4 +32,9 @@ export class GameService {
     return this.http.post<any>(`${this.api}/play-move/`, data);
   }
 
+  getPossiblePlayers(gameId: string, row: number, col: number) {
+    return this.http.get<any[]>(
+      `${this.api}/game/${gameId}/possible-players/?row=${row}&col=${col}`
+    );
+  }
 }

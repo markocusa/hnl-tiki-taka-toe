@@ -26,8 +26,10 @@ export class AppComponent {
   selectedCell: { row: number, col: number } | null = null;
   players: any[] = [];
   filteredPlayers: any[] = [];
+  possiblePlayers: any[] = [];
   searchTerm: string = "";
   showPicker = false;
+  showPossiblePlayersModal = false;
 
   constructor(private gameService: GameService) {}
 
@@ -54,40 +56,18 @@ export class AppComponent {
     });
   }
 
-  /*onCellClick(row: number, col: number) {
-    if (!this.gameId) return;
-
-    const cell = this.board[row][col];
-    if (cell?.symbol) return;
-
-    this.gameService.playMove({
-      game_id: this.gameId,
-      row,
-      col,
-      player_name: this.selectedPlayer
-    }).subscribe(res => {
-      console.log("Move result:", res);
-
-      if (res.valid) {
-        this.board = res.board;
-        this.currentTurn = res.current_turn;
-        this.isFinished = res.is_finished;
-        this.winner = res.winner;
-        this.winningLine = res.winning_line;
-      } else {
-        this.currentTurn = this.currentTurn === 'X' ? 'O' : 'X';
-        this.showInvalidMoveFeedback = true;
-        setTimeout(() => {
-          this.showInvalidMoveFeedback = false;
-        }, 600);
-      }
-    });
-  }*/
   onCellClick(row: number, col: number) {
-    this.selectedCell = { row, col };
-    this.showPicker = true;
-    this.searchTerm = "";
-    this.filteredPlayers = this.players;
+    if (this.isFinished) {
+      this.showPossiblePlayers(row, col);
+      return;
+    }
+    const cell = this.board[row][col];
+    if (!cell.symbol) {
+      this.selectedCell = { row, col };
+      this.showPicker = true;
+      this.searchTerm = "";
+      this.filteredPlayers = this.players;
+    }
   }
 
   isWinningCell(row: number, col: number): boolean {
@@ -138,5 +118,17 @@ export class AppComponent {
       this.showPicker = false;
       this.selectedCell = null;
     });
+  }
+
+  showPossiblePlayers(row: number, col: number) {
+    if (!this.gameId) {
+      return;
+    }
+    this.gameService
+      .getPossiblePlayers(this.gameId, row, col)
+      .subscribe(players => {
+        this.possiblePlayers = players;
+        this.showPossiblePlayersModal = true;
+      });
   }
 }

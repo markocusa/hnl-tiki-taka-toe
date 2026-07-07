@@ -186,3 +186,35 @@ def get_game(request, game_id):
         "is_finished": game.is_finished,
         "winner": game.winner
     })
+
+@api_view(['GET'])
+def possible_players(request, game_id):
+    row = int(request.GET.get("row"))
+    col = int(request.GET.get("col"))
+    try:
+        game = Game.objects.get(id=game_id)
+    except Game.DoesNotExist:
+        return Response({"error": "Game not found"}, status=404)
+    try:
+        row_rule = RowRule.objects.get(game=game, index=row)
+        col_rule = ColRule.objects.get(game=game, index=col)
+    except:
+        return Response({"error": "Rules not found"}, status=404)
+    players = Player.objects.all()
+    players = apply_rule(
+        players,
+        row_rule.field,
+        row_rule.value
+     )
+    players = apply_rule(
+        players,
+        col_rule.field,
+        col_rule.value
+    )
+    return Response([
+        {
+            "name": player.name,
+            "name_in_home_country": player.name_in_home_country
+        }
+        for player in players
+    ])

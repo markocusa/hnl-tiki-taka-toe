@@ -35,7 +35,12 @@
     <div
       *ngFor="let cell of row; let j = index"
       [ngStyle]="{
-        'background-color': isWinningCell(i,j) ? '#90ee90' : 'white'
+        'background-color': isWinningCell(i,j) 
+            ? '#90ee90'
+            : (selectedCell?.row === i && selectedCell?.col === j
+              ? '#d6ecff'
+              : 'white'),
+          'cursor': (!cell.symbol || isFinished) ? 'pointer' : 'default'
       }"
       style="
         width: 60px;
@@ -47,7 +52,7 @@
         font-size: 24px;
         cursor: pointer;
       "
-      (click)="!cell.symbol && !isFinished && onCellClick(i, j)"
+      (click)="onCellClick(i, j)"
     >
       <div>{{ cell.symbol }}</div>
       <div style="font-size: 10px; color: gray">
@@ -58,17 +63,46 @@
 </div>
 
 <div *ngIf="showPicker" class="modal">
-  
-  <input
-    type="text"
-    placeholder="Search player..."
-    [(ngModel)]="searchTerm"
-    (input)="onSearchChange(searchTerm)"
-  />
 
-  <div *ngFor="let player of filteredPlayers"
-       (click)="selectPlayer(player)">
-    {{ player.name }}
+  <div class="player-list-box">
+
+    <input
+      type="text"
+      placeholder="Search player..."
+      [(ngModel)]="searchTerm"
+      (input)="onSearchChange(searchTerm)"
+    />
+
+    <div class="players-container">
+      <div
+        *ngFor="let player of filteredPlayers"
+        (click)="selectPlayer(player)"
+        class="player-item"
+      >
+        {{ player.name }}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div *ngIf="showPossiblePlayersModal" class="modal">
+
+  <div class="player-list-box">
+
+    <h3>Possible players</h3>
+
+    <div class="players-container">
+      <div *ngFor="let player of possiblePlayers">
+        {{ player.name }}
+      </div>
+    </div>
+
+    <button (click)="showPossiblePlayersModal = false">
+      Close
+    </button>
+
   </div>
 
 </div>
