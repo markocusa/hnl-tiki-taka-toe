@@ -36,9 +36,7 @@ for id,value in all_players.items():
         response = requests.get(f"{BASE_URL}/players/{tm_id}/profile",timeout=10)
         data = response.json()
         name=data["name"]
-        citizenship=data["citizenship"]
-        if ("N/A" in citizenship):
-            citizenship.remove("N/A")
+        citizenship=data["citizenship"][0]
         nameInHomeCountry=data.get("nameInHomeCountry") or name
         isRetired=data["isRetired"]
         marketValue=data.get("marketValue") or 0

@@ -9,7 +9,7 @@ with open("data/jsons/all_players_data.json", "r", encoding="utf-8") as f:
 players["511386"]={
     "tm_id": "511386",
     "name": "Andrej Lazarov",
-    "citizenship": ["North Macedonia"],
+    "citizenship": "North Macedonia",
     "nameInHomeCountry": "Andrej Lazarov",
     "isRetired": True,
     "marketValue": 0,
@@ -42,7 +42,7 @@ players["511386"]={
 players["27912"]={
     "tm_id": "27912",
     "name": "Nikola Pokrivac",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Nikola Pokrivač",
     "isRetired": True,
     "marketValue": 0,
@@ -80,7 +80,7 @@ players["27912"]={
 players["47623"]={
     "tm_id": "47623",
     "name": "Alen Pamic",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Alen Pamić",
     "isRetired": True,
     "marketValue": 0,
@@ -113,7 +113,7 @@ players["47623"]={
 players["217097"]={
     "tm_id": "217097",
     "name": "Jakov Jelic",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Jakov Jelić",
     "isRetired": True,
     "marketValue": 0,
@@ -136,7 +136,7 @@ players["217097"]={
 players["287798"]={
     "tm_id": "287798",
     "name": "Mile Zelenika",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Mile Zelenika",
     "isRetired": True,
     "marketValue": 0,
@@ -159,7 +159,7 @@ players["287798"]={
 players["27856"]={
     "tm_id": "27856",
     "name": "Drazen Govic",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Dražen Gović",
     "isRetired": True,
     "marketValue": 0,
@@ -190,7 +190,7 @@ players["27856"]={
 players["128182"]={
     "tm_id": "128182",
     "name": "Senid Kulacic",
-    "citizenship": ["Bosnia-Herzegovina"],
+    "citizenship": "Bosnia-Herzegovina",
     "nameInHomeCountry": "Senid Kulačić",
     "isRetired": True,
     "marketValue": 0,
@@ -217,7 +217,7 @@ players["128182"]={
 players["282029"]={
     "tm_id": "282029",
     "name": "Jordan Diakiese",
-    "citizenship": ["France","DR Congo"],
+    "citizenship": "France",
     "nameInHomeCountry": "Jordan Dueni Diakiese",
     "isRetired": True,
     "marketValue": 0,
@@ -240,7 +240,7 @@ players["282029"]={
 players["27925"]={
     "tm_id": "27925",
     "name": "Zeljko Rumbak",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Željko Rumbak",
     "isRetired": True,
     "marketValue": 0,
@@ -263,7 +263,7 @@ players["27925"]={
 players["99536"]={
     "tm_id": "99536",
     "name": "Ivo Tomas",
-    "citizenship": ["Croatia", "Germany"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Ivo Valentino Tomaš",
     "isRetired": True,
     "marketValue": 0,
@@ -290,7 +290,7 @@ players["99536"]={
 players["27927"]={
     "tm_id": "27927",
     "name": "Edin Saranovic",
-    "citizenship": ["Bosnia-Herzegovina", "Croatia"],
+    "citizenship": "Bosnia-Herzegovina",
     "nameInHomeCountry": "Edin Šaranović",
     "isRetired": True,
     "marketValue": 0,
@@ -324,7 +324,7 @@ players["27927"]={
 players["24628"]={
     "tm_id": "24628",
     "name": "Ivan Turina",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Ivan Turina",
     "isRetired": True,
     "marketValue": 0,
@@ -354,7 +354,7 @@ players["24628"]={
 players["40728"]={
     "tm_id": "40728",
     "name": "Marko Pavosevic",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Marko Pavošević",
     "isRetired": True,
     "marketValue": 0,
@@ -377,7 +377,7 @@ players["40728"]={
 players["47611"]={
     "tm_id": "47611",
     "name": "Ivan Celikovic",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Ivan Čeliković",
     "isRetired": True,
     "marketValue": 0,
@@ -410,7 +410,7 @@ players["47611"]={
 players["315876"]={
     "tm_id": "315876",
     "name": "Bruno Boban",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Bruno Boban",
     "isRetired": True,
     "marketValue": 0,
@@ -438,7 +438,7 @@ players["315876"]={
 players["1007"]={
     "tm_id": "1007",
     "name": "Mladen Bartolovic",
-    "citizenship": ["Bosnia-Herzegovina", "Croatia"],
+    "citizenship": "Bosnia-Herzegovina",
     "nameInHomeCountry": "Mladen Bartolović",
     "isRetired": True,
     "marketValue": 0,
@@ -476,7 +476,7 @@ players["1007"]={
 players["28611"]={
     "tm_id": "28611",
     "name": "Josip Lukacevic",
-    "citizenship": ["Bosnia-Herzegovina", "Croatia"],
+    "citizenship": "Bosnia-Herzegovina",
     "nameInHomeCountry": "Josip Lukačević",
     "isRetired": True,
     "marketValue": 0,
@@ -507,7 +507,7 @@ players["28611"]={
 players["226168"]={
     "tm_id": "226168",
     "name": "Josko Hajder",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Joško Hajder",
     "isRetired": True,
     "marketValue": 0,
@@ -536,7 +536,7 @@ players["226168"]={
 players["126415"]={
     "tm_id": "126415",
     "name": "Karolis Chvedukas",
-    "citizenship": ["Lithuania"],
+    "citizenship": "Lithuania",
     "nameInHomeCountry": "Karolis Chvedukas",
     "isRetired": True,
     "marketValue": 0,
@@ -563,7 +563,7 @@ players["126415"]={
 players["11"]={
     "tm_id": "11",
     "name": "Georg Koch",
-    "citizenship": ["Germany"],
+    "citizenship": "Germany",
     "nameInHomeCountry": "Georg Koch",
     "isRetired": True,
     "marketValue": 0,
@@ -591,7 +591,7 @@ players["11"]={
 players["44245"]={
     "tm_id": "44245",
     "name": "Mihael Remenar",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Mihael Remenar",
     "isRetired": True,
     "marketValue": 0,
@@ -614,7 +614,7 @@ players["44245"]={
 players["27842"]={
     "tm_id": "27842",
     "name": "Hrvoje Custic",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Hrvoje Ćustic",
     "isRetired": True,
     "marketValue": 0,
@@ -643,7 +643,7 @@ players["27842"]={
 players["47346"]={
     "tm_id": "47346",
     "name": "Domagoj Krajacic",
-    "citizenship": ["Croatia"],
+    "citizenship": "Croatia",
     "nameInHomeCountry": "Domagoj Krajačić",
     "isRetired": True,
     "marketValue": 0,

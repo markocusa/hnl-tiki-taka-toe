@@ -24,13 +24,13 @@
 
 <div style="display: flex; margin-left: 60px;">
   <div *ngFor="let col of colRules" style="width: 60px; text-align: center;">
-    {{ col.value }}
+    {{ col.display }}
   </div>
 </div>
 <div *ngIf="board.length">
   <div *ngFor="let row of board; let i = index" style="display: flex;">
     <div style="width: 60px; display:flex; align-items:center; justify-content:center;">
-      {{ rowRules[i]?.value }}
+      {{ rowRules[i].display }}
     </div>
     <div
       *ngFor="let cell of row; let j = index"

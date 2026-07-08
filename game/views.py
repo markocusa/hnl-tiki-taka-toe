@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Player, Game, Cell, RowRule, ColRule, Country, Club, Confederation
+from .models import Player, Game, Cell, RowRule, ColRule, Country, Club, Confederation, Coach
 from .serializer import PlayerSerializer
 import random
 from functools import partial
@@ -13,18 +13,99 @@ from .engine.logic import check_win, is_draw
 RULE_TYPES = [
     "country",
     "club",
-    "confederation"
+    "confederation",
+    "coach",
+    "hnl_nastupi",
+    "hnl_golovi"
+]
+
+VALID_COUNTRIES = [
+    "Albania",
+    #"Algeria", #
+    "Argentina",
+    "Australia",
+    "Austria",
+    #"Azerbaijan", #
+    "Bosnia-Herzegovina",
+    "Brazil",
+    #"Bulgaria", #
+    #"Colombia", #
+    #"Cote d'Ivoire", #
+    "Croatia", #(možda prelagano)
+    #"Georgia", #
+    #"Ghana", #
+    #"Greece", #
+    #"Hungary", #
+    "Japan",
+    "Kosovo",
+    "Montenegro",
+    #"Morocco", #
+    #"Netherlands", #
+    #"Nigeria", #
+    "North Macedonia",
+    #"Poland", #
+    "Portugal",
+    #"Senegal", #
+    "Serbia",
+    "Slovenia",
+    "Spain",
+    #"Sweden", #
+    "Switzerland",
+    #"The Gambia", #
+    "Ukraine"
+]
+VALID_CONFEDERATIONS = [
+    "AFC",
+    "CAF",
+    "CONMEBOL"
+]
+VALID_CLUBS = [
+  "GNK Dinamo Zagreb",
+  "HNK Hajduk Split",
+  "HNK Rijeka",
+  "HNK Sibenik",
+  "NK Osijek",
+  "NK Varazdin",
+  "Slaven Belupo Koprivnica",
+  #"NK Zagreb",
+  "NK Istra 1961",
+  #"NK Medjimurje Cakovec",
+  #"NK Kamen Ingrad Velika",
+  #"HNK Cibalia Vinkovci",
+  #"NK Zadar",
+  #"NK Inter Zapresic",
+  #"NK Croatia Sesvete",
+  #"NK Karlovac 1919",
+  "NK Lokomotiva Zagreb",
+  "RNK Split",
+  "NK Hrvatski Dragovoljac",
+  #"NK Lucko",
+  "NK Rudes",
+  "HNK Gorica",
+  "HNK Vukovar 1991"
 ]
 
 def random_rule():
     field = random.choice(RULE_TYPES)
     if field == "country":
-        value = random.choice(list(Country.objects.values_list("name", flat=True)))
+        value = random.choice(VALID_COUNTRIES)
+        display = value
     elif field == "club":
-        value = random.choice(list(Club.objects.values_list("name", flat=True)))
+        value = random.choice(VALID_CLUBS)
+        display = value
     elif field == "confederation":
-        value = random.choice(list(Confederation.objects.values_list("name", flat=True)))
-    return field, value
+        value = random.choice(VALID_CONFEDERATIONS)
+        display = value
+    elif field == "coach":
+        value = random.choice(list(Coach.objects.values_list("name", flat=True)))
+        display = value
+    elif field == "hnl_nastupi":
+        value = random.choice([100, 150, 200])
+        display = f"{value}+ HNL nastupa"
+    elif field == "hnl_golovi":
+        value = str(random.choice([20,35,50]))
+        display = f"{value}+ HNL golova"
+    return field, value, display
 
 def create_rules(game):
     RowRule.objects.filter(game=game).delete()
@@ -32,30 +113,66 @@ def create_rules(game):
 
     row_rules = []
     col_rules = []
-    
-    used=set()
-    used_fields=set()
-    for i in range(3):
-        field, value = random_rule()
-        while ((field,value) in used):
-            field, value = random_rule()
-        used.add((field,value))
-        if (field!="club"):
-            used_fields.add(field)
-        row_rules.append((field, value))
+    used = set()
 
     for i in range(3):
-        field, value = random_rule()
-        while (field in used_fields or (field,value) in used):
-            field, value = random_rule()
-        used.add((field,value))
-        col_rules.append((field, value))
+        while True:
+            rule = random_rule()
+            field, value, display = rule
+            if (field, value) in used:
+                continue
+            if field in ["hnl_nastupi", "hnl_golovi"]:
+                if any(r[0] == field for r in row_rules):
+                    continue
+            break
+        used.add((field, value))
+        row_rules.append(rule)
 
-    for i, (field, value) in enumerate(row_rules):
-        RowRule.objects.create(game=game, index=i, field=field, value=value)
+    for i in range(3):
+        while True:
+            rule = random_rule()
+            field, value, display = rule
+            if (field, value) in used:
+                continue
+            if field in ["hnl_nastupi", "hnl_golovi"]:
+                if any(r[0] == field for r in row_rules + col_rules):
+                    continue
+            if rules_conflict(rule, row_rules):
+                continue
+            if rules_conflict(rule, col_rules):
+                continue
+            break
+        used.add((field, value))
+        col_rules.append(rule)
 
-    for i, (field, value) in enumerate(col_rules):
-        ColRule.objects.create(game=game, index=i, field=field, value=value)
+    for i, (field, value, display) in enumerate(row_rules):
+        RowRule.objects.create(game=game,index=i,field=field,value=value,display=display)
+    for i, (field, value, display) in enumerate(col_rules):
+        ColRule.objects.create(game=game,index=i,field=field,value=value,display=display)
+
+def rules_conflict(new_rule, existing_rules):
+    new_field, new_value, _ = new_rule
+
+    for field, value, _ in existing_rules:
+        if new_field in ["hnl_nastupi", "hnl_golovi"] and new_field == field:
+            return True
+
+        if new_field == "confederation" and field == "confederation":
+            return True
+
+        if new_field == "country" and field == "country":
+            return True
+
+        if new_field == "country" and field == "confederation":
+            country = Country.objects.filter(name=new_value).first()
+            if country and country.confederation.name == value:
+                return True
+
+        if new_field == "confederation" and field == "country":
+            country = Country.objects.filter(name=value).first()
+            if country and country.confederation.name == new_value:
+                return True
+    return False
 
 def board_is_valid(game):
     players = get_all_players()
@@ -175,11 +292,11 @@ def get_game(request, game_id):
         "game_id": str(game.id),
         "board": board,
         "row_rules": [
-            {"index": r.index, "field": r.field, "value": r.value}
+            {"index": r.index, "field": r.field, "value": r.value, "display": r.display}
             for r in game.row_rules.all()
         ],
         "col_rules": [
-            {"index": c.index, "field": c.field, "value": c.value}
+            {"index": c.index, "field": c.field, "value": c.value, "display": c.display}
             for c in game.col_rules.all()
         ],
         "current_turn": game.current_turn,

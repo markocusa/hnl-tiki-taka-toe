@@ -17,7 +17,8 @@ class Command(BaseCommand):
 
             name = value.get("name")
             clubs = value.get("klubovi", [])
-            countries = value.get("citizenship", [])
+            country_name = value.get("citizenship", [None])
+            country = Country.objects.filter(name=country_name).first()
 
             if not name:
                 continue
@@ -30,6 +31,7 @@ class Command(BaseCommand):
                     "is_retired": value.get("isRetired") or False,
                     "market_value": value.get("marketValue") or 0,
                     "player_slug": value.get("player_slug") or "",
+                    "country": country,
 
                     "hnl_nastupi": value.get("hnl_nastupi") or 0,
                     "kup_nastupi": value.get("kup_nastupi") or 0,
@@ -54,12 +56,6 @@ class Command(BaseCommand):
                 club = Club.objects.filter(tm_id=club_id).first()
                 if club:
                     player.clubs.add(club)
-
-            # COUNTRIES
-            for country_name in countries:
-                country = Country.objects.filter(name=country_name).first()
-                if country:
-                    player.countries.add(country)
 
             if created_flag:
                 created += 1

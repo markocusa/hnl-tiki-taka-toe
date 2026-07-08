@@ -2,6 +2,7 @@ export interface Rule {
   index: number;
   field: string;
   value: string;
+  display: string
 }
 
 export interface Cell {

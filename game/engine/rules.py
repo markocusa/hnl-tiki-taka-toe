@@ -16,26 +16,41 @@ def apply_rule(players, field, value):
 
 @register_rule("country")
 def country_rule(players, value):
-    return [
-        p for p in players
-        if any(c.name.lower() == value.lower() for c in p.countries.all())
-    ]
+    return players.filter(
+        country__name__iexact=value
+    )
 
 
 @register_rule("club")
 def club_rule(players, value):
-    return [
-        p for p in players
-        if any(c.name.lower() == value.lower() for c in p.clubs.all())
-    ]
+    return players.filter(
+        clubs__name__iexact=value
+    ).distinct()
 
 
 @register_rule("confederation")
 def conf_rule(players, value):
-    return [
-        p for p in players
-        if any(
-            c.confederation.name.lower() == value.lower()
-            for c in p.countries.all()
-        )
-    ]
+    return players.filter(
+        country__confederation__name__iexact=value
+    )
+
+
+@register_rule("coach")
+def coach_rule(players, value):
+    return players.filter(
+        coaches__name__iexact=value
+    ).distinct()
+
+
+@register_rule("hnl_nastupi")
+def hnl_nastupi_rule(players, value):
+    return players.filter(
+        hnl_nastupi__gte=int(value)
+    )
+
+
+@register_rule("hnl_golovi")
+def hnl_golovi_rule(players, value):
+    return players.filter(
+        hnl_golovi__gte=int(value)
+    )

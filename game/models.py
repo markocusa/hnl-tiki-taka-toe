@@ -38,7 +38,8 @@ class Player(models.Model):
     player_slug = models.CharField(max_length=150)
 
     clubs = models.ManyToManyField("Club", related_name="players")
-    countries = models.ManyToManyField("Country", related_name="players")
+    country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, related_name="players")
+    coaches = models.ManyToManyField("Coach", related_name="players")
 
     hnl_nastupi = models.IntegerField(default=0)
     kup_nastupi = models.IntegerField(default=0)
@@ -89,9 +90,11 @@ class RowRule(models.Model):
     index = models.IntegerField()
     field = models.CharField(max_length=50)
     value = models.CharField(max_length=100)
+    display = models.CharField(max_length=100)
 
 class ColRule(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="col_rules")
     index = models.IntegerField()  # 0,1,2
     field = models.CharField(max_length=50)
     value = models.CharField(max_length=100)
+    display = models.CharField(max_length=100)
