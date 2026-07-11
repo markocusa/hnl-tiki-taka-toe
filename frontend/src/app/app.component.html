@@ -27,7 +27,7 @@
     {{ col.display }}
   </div>
 </div>
-<div *ngIf="board.length">
+<div *ngIf="board.length" class="board-wrapper">
   <div *ngFor="let row of board; let i = index" style="display: flex;">
     <div style="width: 60px; display:flex; align-items:center; justify-content:center;">
       {{ rowRules[i].display }}
@@ -35,12 +35,11 @@
     <div
       *ngFor="let cell of row; let j = index"
       [ngStyle]="{
-        'background-color': isWinningCell(i,j) 
-            ? '#90ee90'
-            : (selectedCell?.row === i && selectedCell?.col === j
-              ? '#d6ecff'
-              : 'white'),
-          'cursor': (!cell.symbol || isFinished) ? 'pointer' : 'default'
+        'background-color':
+          selectedCell?.row === i && selectedCell?.col === j
+            ? '#d6ecff'
+            : 'white',
+        'cursor': (!cell.symbol || isFinished) ? 'pointer' : 'default'
       }"
       style="
         width: 60px;
@@ -60,6 +59,14 @@
       </div>
     </div>
   </div>
+  <svg *ngIf="winningLine" class="win-line">
+    <line
+      [attr.x1]="lineCoords.x1"
+      [attr.y1]="lineCoords.y1"
+      [attr.x2]="lineCoords.x2"
+      [attr.y2]="lineCoords.y2"
+    />
+  </svg>
 </div>
 
 <div *ngIf="showPicker" class="modal">
@@ -79,7 +86,7 @@
         (click)="selectPlayer(player)"
         class="player-item"
       >
-        {{ player.name }}
+        {{ player.search_name }}
       </div>
     </div>
 
@@ -95,7 +102,7 @@
 
     <div class="players-container">
       <div *ngFor="let player of possiblePlayers">
-        {{ player.name }}
+        {{ player.search_name }}
       </div>
     </div>
 

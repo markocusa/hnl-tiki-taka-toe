@@ -1,4 +1,5 @@
 import json
+from unidecode import unidecode
 from django.core.management.base import BaseCommand
 from game.models import Player, Club, Country
 
@@ -15,7 +16,7 @@ class Command(BaseCommand):
 
         for tm_id, value in players.items():
 
-            name = value.get("name")
+            name = unidecode(value.get("name"),errors='preserve')
             clubs = value.get("klubovi", [])
             country_name = value.get("citizenship", [None])
             country = Country.objects.filter(name=country_name).first()
@@ -28,6 +29,7 @@ class Command(BaseCommand):
                 defaults={
                     "name": name,
                     "name_in_home_country": value.get("nameInHomeCountry") or "",
+                    "search_name": value.get("searchName") or "",
                     "is_retired": value.get("isRetired") or False,
                     "market_value": value.get("marketValue") or 0,
                     "player_slug": value.get("player_slug") or "",

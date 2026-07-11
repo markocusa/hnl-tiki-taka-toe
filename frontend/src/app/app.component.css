@@ -28,3 +28,23 @@
 .player-item:hover {
   background-color: #f0f0f0;
 }
+
+.board-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.win-line {
+  position: absolute;
+  left: 60px;
+  top: 0;
+  width: 180px;
+  height: 180px;
+  pointer-events: none;
+}
+
+.win-line line {
+  stroke: red;
+  stroke-width: 6;
+  stroke-linecap: round;
+}

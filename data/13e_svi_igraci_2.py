@@ -1,6 +1,8 @@
 import requests
 import json
 import os
+import cyrtranslit
+import re
 
 
 
@@ -29,6 +31,19 @@ for tm_id in list(mistakes.keys()):
         name=data["name"]
         citizenship=data["citizenship"][0]
         nameInHomeCountry=data.get("nameInHomeCountry") or name
+
+        latin_name = nameInHomeCountry
+        if (citizenship == "Serbia"):
+            latin_name=cyrtranslit.to_latin(latin_name, "sr")
+        elif (citizenship == "Montenegro"):
+            latin_name=cyrtranslit.to_latin(latin_name, "me")
+        elif (citizenship == "North Macedonia"):
+            latin_name=cyrtranslit.to_latin(latin_name, "mk")
+        if re.search(r"[čćšžđČĆŠŽĐ]", latin_name):
+            search_name = latin_name
+        else:
+            search_name = name
+
         isRetired=data["isRetired"]
         marketValue=data.get("marketValue") or 0
         player_slug=data["url"].split("/")[3]
@@ -152,6 +167,7 @@ for tm_id in list(mistakes.keys()):
             "name": name,
             "citizenship": citizenship,
             "nameInHomeCountry": nameInHomeCountry,
+            "searchName": search_name,
             "isRetired": isRetired,
             "marketValue": marketValue,
             "player_slug": player_slug,

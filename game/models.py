@@ -33,6 +33,7 @@ class Player(models.Model):
     tm_id = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=100)
     name_in_home_country = models.CharField(max_length=100)
+    search_name = models.CharField(max_length=100)
     is_retired = models.BooleanField(default=False)
     market_value = models.FloatField(default=0)
     player_slug = models.CharField(max_length=150)

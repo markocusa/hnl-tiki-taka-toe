@@ -30,6 +30,7 @@ export class AppComponent {
   searchTerm: string = "";
   showPicker = false;
   showPossiblePlayersModal = false;
+  lineCoords = {x1: 0,y1: 0,x2: 0,y2: 0};
 
   constructor(private gameService: GameService) {}
 
@@ -70,12 +71,18 @@ export class AppComponent {
     }
   }
 
-  isWinningCell(row: number, col: number): boolean {
-    if (!this.winningLine) return false;
+  updateWinningLine() {
+    if (!this.winningLine) return;
 
-    return this.winningLine.some(
-      ([r, c]) => r === row && c === col
-    );
+    const first = this.winningLine[0];
+    const last = this.winningLine[2];
+
+    this.lineCoords = {
+      x1: first[1] * 60 + 30,
+      y1: first[0] * 60 + 30,
+      x2: last[1] * 60 + 30,
+      y2: last[0] * 60 + 30,
+    };
   }
 
   ngOnInit() {
@@ -87,9 +94,17 @@ export class AppComponent {
 
   onSearchChange(value: string) {
     this.filteredPlayers = this.players.filter(p =>
-      p.name.toLowerCase().includes(value.toLowerCase()) ||
-      p.name_in_home_country.toLowerCase().includes(value.toLowerCase())
+      this.normalize(p.name).includes(this.normalize(value)) ||
+      this.normalize(p.name_in_home_country).includes(this.normalize(value)) ||
+      this.normalize(p.search_name).includes(this.normalize(value))
     );
+  }
+
+  normalize(text: string): string {
+    return text
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
   }
 
   selectPlayer(player: any) {
@@ -107,6 +122,9 @@ export class AppComponent {
         this.isFinished = res.is_finished;
         this.winner = res.winner;
         this.winningLine = res.winning_line;
+        if (this.winningLine) {
+          this.updateWinningLine();
+        }
       } else {
         this.currentTurn = this.currentTurn === 'X' ? 'O' : 'X';
         this.showInvalidMoveFeedback = true;
