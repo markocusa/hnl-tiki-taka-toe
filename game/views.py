@@ -124,6 +124,12 @@ def create_rules(game):
             if field in ["hnl_nastupi", "hnl_golovi"]:
                 if any(r[0] == field for r in row_rules):
                     continue
+            elif field == "country":
+                if any(r[0] == "confederation" and Country.objects.filter(name=value).first().confederation.name == r[1] for r in row_rules):
+                    continue
+            elif field == "confederation":
+                if any(r[0] == "country" and Country.objects.filter(name=r[1]).first().confederation.name == value for r in row_rules):
+                    continue
             break
         used.add((field, value))
         row_rules.append(rule)
@@ -331,7 +337,7 @@ def possible_players(request, game_id):
     return Response([
         {
             "name": player.name,
-            "name_in_home_country": player.name_in_home_country
+            "search_name": player.search_name
         }
         for player in players
     ])
