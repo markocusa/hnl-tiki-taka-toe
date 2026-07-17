@@ -148,16 +148,22 @@
 }
 
 .jersey-shape {
-  stroke: rgba(0,0,0,0.15);
+  stroke: rgba(0,0,0,0.25);
   stroke-width: 1;
 }
 
-.jersey-x {
-  fill: #1a5c2e;
+.jersey-highlight {
+  fill: rgba(255,255,255,0.25);
 }
 
-.jersey-o {
-  fill: #e30613;
+.jersey-fold {
+  stroke: rgba(0,0,0,0.12);
+  stroke-width: 1;
+  fill: none;
+}
+
+.jersey-fold-side {
+  stroke: rgba(0,0,0,0.08);
 }
 
 .jersey-letter {
@@ -165,6 +171,9 @@
   font-size: 34px;
   font-weight: 800;
   font-family: 'Segoe UI', Arial, sans-serif;
+  paint-order: stroke;
+  stroke: rgba(0,0,0,0.35);
+  stroke-width: 1.5;
 }
 
 .cell-player {
@@ -212,6 +221,35 @@
 .player-list-box h3 {
   margin-top: 0;
   color: #1a5c2e;
+}
+
+.picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.picker-header h3 {
+  margin: 0;
+}
+
+.btn-close-x {
+  background: none;
+  border: none;
+  font-size: 18px;
+  font-weight: 700;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-close-x:hover {
+  background: #f0f0f0;
+  color: #e30613;
 }
 
 .player-list-box input {
