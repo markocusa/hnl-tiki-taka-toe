@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 import {
   GameResponse,
   CreateMatchResponse,
@@ -15,7 +16,7 @@ export class GameService {
 
   private http = inject(HttpClient);
 
-  private api = 'http://127.0.0.1:8000/api';
+  private api = environment.apiUrl;
 
   createGame(categories?: string[]) {
     const body = categories && categories.length ? { categories } : {};
@@ -40,6 +41,10 @@ export class GameService {
 
   joinMatch(matchId: string, session?: string) {
     return this.http.post<JoinMatchResponse>(`${this.api}/match/${matchId}/join/`, { session });
+  }
+
+  joinByCode(code: string, session?: string) {
+    return this.http.post<JoinMatchResponse>(`${this.api}/join-by-code/`, { code, session });
   }
 
   getMatchState(matchId: string, session?: string) {

@@ -20,6 +20,7 @@ export interface MatchSummary {
   games_played: number;
   is_online?: boolean;
   seconds_per_move?: number | null;
+  join_code?: string | null;
 }
 
 export interface GameResponse {

@@ -78,11 +78,12 @@ class Match(models.Model):
     is_finished = models.BooleanField(default=False)
     winner = models.CharField(max_length=1, null=True, blank=True)  # "X" ili "O"
 
-    # play with a friend (online preko linka)
+    # play with a friend (online preko linka ili koda)
     is_online = models.BooleanField(default=False)
     player_x_session = models.UUIDField(null=True, blank=True)
     player_o_session = models.UUIDField(null=True, blank=True)
     seconds_per_move = models.IntegerField(null=True, blank=True)  # None = bez limita
+    join_code = models.CharField(max_length=8, null=True, blank=True, unique=True)
 
     def __str__(self):
         return f"Match {self.id} (Bo{self.best_of})"

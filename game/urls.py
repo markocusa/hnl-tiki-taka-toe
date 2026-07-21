@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     players, create_game, play_move, get_game, possible_players,
-    create_match, get_match, next_game, join_match, match_state
+    create_match, get_match, next_game, join_match, match_state, join_by_code
 )
 
 urlpatterns = [
@@ -14,5 +14,6 @@ urlpatterns = [
     path('match/<uuid:match_id>/', get_match),
     path('match/<uuid:match_id>/join/', join_match),
     path('match/<uuid:match_id>/state/', match_state),
+    path('join-by-code/', join_by_code),
     path('next-game/', next_game),
 ]

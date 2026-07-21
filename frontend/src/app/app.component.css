@@ -98,6 +98,12 @@
   color: #444;
 }
 
+.join-code-section {
+  border-top: 1px solid #e5e5e5;
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
 .friend-link-box {
   margin: 12px 0;
   text-align: center;

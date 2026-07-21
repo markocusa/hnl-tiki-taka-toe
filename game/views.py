@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .models import Player, Game, Cell, RowRule, ColRule, Country, Club, Confederation, Coach, Match
 from .serializer import PlayerSerializer
 import random
+import string
 import uuid
 from functools import partial
 from .engine.players import get_all_players
@@ -237,6 +238,12 @@ def check_and_handle_move_timeout(game, match):
         return match.seconds_per_move
     return int(remaining)
 
+def generate_join_code():
+    while True:
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        if not Match.objects.filter(join_code=code).exists():
+            return code
+
 # Create your views here.
 @api_view(['GET'])
 def players(request):
@@ -361,6 +368,7 @@ def match_summary(match):
         "games_played": match.games.count(),
         "is_online": match.is_online,
         "seconds_per_move": match.seconds_per_move,
+        "join_code": match.join_code,
     }
 
 @api_view(['POST'])
@@ -380,6 +388,7 @@ def create_match(request):
     )
     if is_online:
         match.player_x_session = uuid.uuid4()
+        match.join_code = generate_join_code()
         match.save()
 
     game = generate_valid_game(allowed_fields, match=match, game_number=1)
@@ -433,6 +442,17 @@ def join_match(request, match_id):
         "your_symbol": "O",
         "match": match_summary(match)
     })
+
+@api_view(['POST'])
+def join_by_code(request):
+    code = (request.data.get("code") or "").strip().upper()
+    if not code:
+        return Response({"error": "Unesi kod"}, status=400)
+    try:
+        match = Match.objects.get(join_code=code)
+    except Match.DoesNotExist:
+        return Response({"error": "Kod nije pronađen"}, status=404)
+    return join_match(request, match.id)
 
 @api_view(['GET'])
 def match_state(request, match_id):
