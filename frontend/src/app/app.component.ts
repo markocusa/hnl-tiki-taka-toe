@@ -57,6 +57,7 @@ export class AppComponent implements OnInit, OnDestroy {
   secondsRemaining: number | null = null;
   joinCodeInput = '';
   joinCodeError: string | null = null;
+  drawRequestedBy: string | null = null;
   private pollingInterval: ReturnType<typeof setInterval> | null = null;
 
   get selectedCategoryKeys(): string[] {
@@ -71,6 +72,18 @@ export class AppComponent implements OnInit, OnDestroy {
 
   get isMyTurn(): boolean {
     return this.mySymbol === this.currentTurn;
+  }
+
+  // online: ja sam zatrazio remi, cekam protivnikov odgovor
+  get isWaitingForMyDrawResponse(): boolean {
+    return this.isFriendMode && !!this.drawRequestedBy && this.drawRequestedBy === this.mySymbol;
+  }
+
+  // lokalno: uvijek prikazi odgovor (isti uredaj). online: samo protivniku koji nije trazio
+  get canRespondToDraw(): boolean {
+    if (!this.drawRequestedBy) return false;
+    if (!this.isFriendMode) return true;
+    return this.drawRequestedBy !== this.mySymbol;
   }
 
   toggleCategory(key: string) {
@@ -95,6 +108,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.onlineEnabled = false;
     this.joinCodeInput = '';
     this.joinCodeError = null;
+    this.drawRequestedBy = null;
   }
 
   gameId: string | null = null;
@@ -172,6 +186,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.isFinished = false;
       this.winner = null;
       this.winningLine = null;
+      this.drawRequestedBy = null;
       this.currentTurn = "X";
       this.showCategorySelector = false;
       this.loadGame();
@@ -197,6 +212,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.isFinished = false;
         this.winner = null;
         this.winningLine = null;
+        this.drawRequestedBy = null;
         this.showCategorySelector = false;
         this.waitingForOpponent = true;
         this.startPolling();
@@ -275,6 +291,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.matchInfo = res.match;
       this.waitingForOpponent = res.waiting_for_opponent;
       this.secondsRemaining = res.seconds_remaining;
+      this.drawRequestedBy = res.draw_requested_by ?? null;
       if (res.your_symbol) {
         this.mySymbol = res.your_symbol;
       }
@@ -295,12 +312,44 @@ export class AppComponent implements OnInit, OnDestroy {
       this.nextGame();
       return;
     }
-    const confirmed = window.confirm(
-      'Igra će se zabilježiti kao remi, a krenut će sljedeća igra u seriji. Jeste li sigurni?'
-    );
-    if (!confirmed) return;
-    this.clearAutoAdvance();
-    this.nextGame();
+    this.requestDraw();
+  }
+
+  requestDraw() {
+    if (!this.gameId || this.winner || this.drawRequestedBy) return;
+    if (this.isFriendMode && this.waitingForOpponent) return;
+    const symbol = this.isFriendMode ? this.mySymbol : this.currentTurn;
+    if (!symbol) return;
+    this.gameService.requestDraw(this.gameId, {
+      symbol,
+      session: this.mySession || undefined
+    }).subscribe(res => {
+      this.drawRequestedBy = res.draw_requested_by ?? null;
+    });
+  }
+
+  respondToDraw(accept: boolean) {
+    if (!this.gameId || !this.drawRequestedBy) return;
+    const symbol = this.isFriendMode
+      ? this.mySymbol
+      : (this.drawRequestedBy === 'X' ? 'O' : 'X');
+    if (!symbol) return;
+    this.gameService.respondDraw(this.gameId, {
+      accept,
+      symbol,
+      session: this.mySession || undefined
+    }).subscribe(res => {
+      this.drawRequestedBy = res.draw_requested_by ?? null;
+      if (res.is_finished) {
+        this.isFinished = true;
+        this.winner = res.winner;
+        if (this.matchInfo && !this.matchInfo.is_finished) {
+          if (!this.isFriendMode || this.mySymbol === 'X') {
+            this.scheduleAutoNextGame();
+          }
+        }
+      }
+    });
   }
 
   scheduleAutoNextGame() {
@@ -327,6 +376,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.isFinished = false;
       this.winner = null;
       this.winningLine = null;
+      this.drawRequestedBy = null;
       this.currentTurn = "X";
       if (this.isFriendMode) {
         // sljedeci poll ce pokupiti novi game preko match state-a
@@ -355,6 +405,9 @@ export class AppComponent implements OnInit, OnDestroy {
   onCellClick(row: number, col: number) {
     if (this.isFinished) {
       this.showPossiblePlayers(row, col);
+      return;
+    }
+    if (this.drawRequestedBy) {
       return;
     }
     if (this.isFriendMode && (this.waitingForOpponent || !this.isMyTurn)) {

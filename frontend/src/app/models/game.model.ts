@@ -34,6 +34,7 @@ export interface GameResponse {
   winning_line: number[][] | null;
   match_id?: string | null;
   game_number?: number;
+  draw_requested_by?: string | null;
   match?: MatchSummary | null;
 }
 
@@ -63,5 +64,6 @@ export interface MatchStateResponse {
   your_symbol: string | null;
   seconds_remaining: number | null;
   waiting_for_opponent: boolean;
+  draw_requested_by?: string | null;
   match: MatchSummary;
 }

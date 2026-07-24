@@ -101,6 +101,7 @@ class Game(models.Model):
         default="X"
     )
     turn_started_at = models.DateTimeField(null=True, blank=True)  # za online timer po potezu
+    draw_requested_by = models.CharField(max_length=1, null=True, blank=True)  # "X" ili "O" - ceka potvrdu protivnika
 
 class Cell(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="cells")

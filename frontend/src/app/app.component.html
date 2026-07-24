@@ -116,13 +116,30 @@
     <div class="match-score">
       Rezultat: X {{ matchInfo.x_wins }} - {{ matchInfo.o_wins }} O
     </div>
+
     <button
-      *ngIf="!matchInfo.is_finished"
+      *ngIf="!matchInfo.is_finished && !drawRequestedBy"
       class="btn-new-game btn-next-game"
       (click)="confirmNextGame()"
     >
       {{ winner ? 'Sljedeća igra' : 'Zatraži remi' }}
     </button>
+  </div>
+
+  <div *ngIf="drawRequestedBy && isWaitingForMyDrawResponse" class="draw-request-banner">
+    <p>Čekaš potvrdu protivnika za remi...</p>
+    <button class="btn-new-game btn-decline-draw" (click)="respondToDraw(false)">Odustani</button>
+  </div>
+
+  <div *ngIf="drawRequestedBy && canRespondToDraw" class="draw-request-banner">
+    <p>
+      {{ isFriendMode ? 'Protivnik traži remi.' : 'Igrač ' + drawRequestedBy + ' traži remi.' }}
+      Prihvaćaš?
+    </p>
+    <div class="draw-request-actions">
+      <button class="btn-new-game btn-accept-draw" (click)="respondToDraw(true)">Prihvati</button>
+      <button class="btn-new-game btn-decline-draw" (click)="respondToDraw(false)">Odbij</button>
+    </div>
   </div>
 
   <div *ngIf="winner">

@@ -79,4 +79,16 @@ export class GameService {
       `${this.api}/game/${gameId}/possible-players/?row=${row}&col=${col}`
     );
   }
+
+  requestDraw(gameId: string, data: { symbol: string; session?: string }) {
+    return this.http.post<{ draw_requested_by: string | null }>(
+      `${this.api}/game/${gameId}/request-draw/`, data
+    );
+  }
+
+  respondDraw(gameId: string, data: { accept: boolean; symbol: string; session?: string }) {
+    return this.http.post<{ is_finished: boolean; winner: string | null; draw_requested_by: string | null }>(
+      `${this.api}/game/${gameId}/respond-draw/`, data
+    );
+  }
 }

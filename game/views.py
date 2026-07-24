@@ -88,6 +88,19 @@ VALID_CLUBS = [
   "HNK Vukovar 1991"
 ]
 
+# ime u bazi (za pretragu) ostaje puno ime iz Transfermarkta, ovdje se
+# samo mijenja kako se klub prikazuje igracima na gridu
+CLUB_DISPLAY_OVERRIDES = {
+    "Slaven Belupo Koprivnica": "Slaven Belupo",
+}
+
+# isti princip - u bazi ostaju kratice (za pretragu), prikaz je razumljiviji
+CONFEDERATION_DISPLAY_OVERRIDES = {
+    "AFC": "Azija (AFC)",
+    "CAF": "Afrika (CAF)",
+    "CONMEBOL": "Južna Amerika (CONMEBOL)",
+}
+
 def random_rule(allowed_fields=None):
     fields = allowed_fields if allowed_fields else RULE_TYPES
     field = random.choice(fields)
@@ -96,10 +109,10 @@ def random_rule(allowed_fields=None):
         display = value
     elif field == "club":
         value = random.choice(VALID_CLUBS)
-        display = value
+        display = CLUB_DISPLAY_OVERRIDES.get(value, value)
     elif field == "confederation":
         value = random.choice(VALID_CONFEDERATIONS)
-        display = value
+        display = CONFEDERATION_DISPLAY_OVERRIDES.get(value, value)
     elif field == "coach":
         value = random.choice(list(Coach.objects.values_list("name", flat=True)))
         display = value
@@ -237,6 +250,20 @@ def check_and_handle_move_timeout(game, match):
         game.save()
         return match.seconds_per_move
     return int(remaining)
+
+def resolve_symbol(request, game):
+    """Utvrđuje je li zahtjev poslao X ili O. Za online mečeve provjerava session
+    token (sigurnost); za lokalne igre na istom uređaju vjeruje poslanom simbolu."""
+    match = game.match
+    if match and match.is_online:
+        session = request.data.get("session")
+        if match.player_x_session and session == str(match.player_x_session):
+            return "X"
+        if match.player_o_session and session == str(match.player_o_session):
+            return "O"
+        return None
+    symbol = request.data.get("symbol")
+    return symbol if symbol in ("X", "O") else None
 
 def generate_join_code():
     while True:
@@ -505,6 +532,7 @@ def match_state(request, match_id):
         "your_symbol": your_symbol,
         "seconds_remaining": seconds_remaining,
         "waiting_for_opponent": match.is_online and not match.player_o_session,
+        "draw_requested_by": game.draw_requested_by,
         "match": match_summary(match),
     })
 
@@ -542,6 +570,57 @@ def next_game(request):
         "game_id": str(game.id)
     })
 
+@api_view(['POST'])
+def request_draw(request, game_id):
+    try:
+        game = Game.objects.select_related('match').get(id=game_id)
+    except Game.DoesNotExist:
+        return Response({"error": "Game not found"}, status=404)
+    if game.is_finished:
+        return Response({"error": "Igra je već završena"}, status=400)
+    if game.draw_requested_by:
+        return Response({"error": "Remi je već zatražen"}, status=400)
+
+    symbol = resolve_symbol(request, game)
+    if symbol not in ("X", "O"):
+        return Response({"error": "Nepoznat igrač"}, status=400)
+
+    game.draw_requested_by = symbol
+    game.save()
+    return Response({"draw_requested_by": game.draw_requested_by})
+
+@api_view(['POST'])
+def respond_draw(request, game_id):
+    try:
+        game = Game.objects.select_related('match').get(id=game_id)
+    except Game.DoesNotExist:
+        return Response({"error": "Game not found"}, status=404)
+    if not game.draw_requested_by:
+        return Response({"error": "Nema aktivnog zahtjeva za remi"}, status=400)
+
+    symbol = resolve_symbol(request, game)
+    if symbol not in ("X", "O"):
+        return Response({"error": "Nepoznat igrač"}, status=400)
+
+    accept = bool(request.data.get("accept"))
+
+    # onaj tko je zatrazio remi moze samo otkazati zahtjev, ne prihvatiti ga
+    if symbol == game.draw_requested_by:
+        game.draw_requested_by = None
+        game.save()
+        return Response({"cancelled": True, "draw_requested_by": None})
+
+    if accept:
+        game.is_finished = True
+        game.winner = "draw"
+    game.draw_requested_by = None
+    game.save()
+    return Response({
+        "is_finished": game.is_finished,
+        "winner": game.winner,
+        "draw_requested_by": None,
+    })
+
 @api_view(['GET'])
 def get_game(request, game_id):
     try:
@@ -569,6 +648,7 @@ def get_game(request, game_id):
         "winner": game.winner,
         "match_id": str(game.match.id) if game.match else None,
         "game_number": game.game_number,
+        "draw_requested_by": game.draw_requested_by,
         "match": match_summary(game.match) if game.match else None
     })
 
