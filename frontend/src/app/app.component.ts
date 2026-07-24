@@ -298,6 +298,17 @@ export class AppComponent implements OnInit, OnDestroy {
       if (this.winningLine) {
         this.updateWinningLine();
       }
+      // fallback: ako je igra zavrsena (npr. protivnik je prihvatio remi na
+      // svom uredaju), X-ov klijent to mora pokupiti i preko pollinga, ne
+      // samo preko izravnog odgovora na akciju - inace nitko ne pokrene sljedecu igru
+      if (
+        res.is_finished &&
+        !res.match.is_finished &&
+        this.mySymbol === 'X' &&
+        !this.autoAdvanceTimer
+      ) {
+        this.scheduleAutoNextGame();
+      }
       if (res.match.is_finished) {
         this.stopPolling();
       }
